@@ -2,6 +2,18 @@
 
 FastAPI server providing an OpenAI-compatible Text-to-Speech (TTS) API endpoint, utilizing `mlx-audio` for generation on Apple Silicon.
 
+## About Dia-1.6B
+
+Dia-1.6B is a state-of-the-art open-source text-to-speech (TTS) model developed by Nari Labs, featuring 1.6 billion parameters. This service is dedicated to providing TTS capabilities using the fixed model `mlx-community/Dia-1.6B-4bit`. Key features include:
+
+- Multi-speaker dialogue generation using [S1], [S2] tags in the input text
+- Fine-grained control over voice, emotion, and speaking style
+- Support for non-verbal expressions like laughter, coughing, and more
+- Voice cloning capabilities for personalized speech synthesis
+- Optimized for English language generation
+
+Dia-1.6B is comparable in performance to leading commercial TTS solutions, while remaining fully open and customizable for research and production use.
+
 ## Setup
 
 1.  **Install Dependencies:**
