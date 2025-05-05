@@ -1,0 +1,23 @@
+[project]
+name = "mac-dia-server"
+version = "0.1.0"
+description = "FastAPI server for TTS compatible with OpenAI API, using mlx-audio."
+authors = [
+    {name = "Your Name", email = "you@example.com"},
+]
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
+    "pydantic>=2.0",
+    "python-dotenv>=1.0.0",
+    "mlx-audio>=0.0.2",
+]
+requires-python = ">=3.9"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+# Optional: Configure uv specific settings here if needed
+

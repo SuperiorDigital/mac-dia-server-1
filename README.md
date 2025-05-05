@@ -1,0 +1,58 @@
+# Mac Dia Server
+
+FastAPI server providing an OpenAI-compatible Text-to-Speech (TTS) API endpoint, utilizing `mlx-audio` for generation on Apple Silicon.
+
+## Setup
+
+1.  **Install Dependencies:**
+    Requires Python 3.9+ and `uv`.
+    ```bash
+    uv venv  # Create virtual environment
+    source .venv/bin/activate
+    uv pip install -r requirements.txt # Or 'uv pip install .' if using pyproject.toml directly
+    # Special attention might be needed for installing mlx and mlx-audio.
+    # Follow official MLX documentation.
+    ```
+
+2.  **Configure API Key:**
+    Create a `.env` file in the project root:
+    ```
+    API_KEY=your_actual_api_key
+    ```
+
+3.  **Run the Server:**
+    ```bash
+    uv run start.py
+    ```
+
+## API Endpoint
+
+-   **URL:** `/v1/audio/speech`
+-   **Method:** `POST`
+-   **Authentication:** `Authorization: Bearer <YOUR_API_KEY>`
+-   **Request Body:** (See OpenAI TTS API documentation)
+    -   `model` (string): e.g., "tts-1"
+    -   `input` (string): Text to synthesize.
+    -   `voice` (string): e.g., "alloy"
+    -   `response_format` (string, optional): e.g., "mp3", defaults to "mp3".
+    -   `speed` (float, optional): Speed, defaults to 1.
+-   **Response:** Audio stream in the specified format.
+
+
+## CURl
+```bash
+ 
+  curl -X 'POST' \
+  'http://localhost:8000/v1/audio/speech' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer " \
+  -d '{
+  "model": "string",
+  "input": "[S1] Dia is an open weights text to dialogue model. [S2] You get full control over scripts and voices. [S1] Wow. Amazing. (laughs) [S2] Try it now on Git hub or Hugging Face.",
+  "voice": "alloy",
+  "response_format": "mp3",
+  "speed": 1
+ }' \
+    --output speech.mp3
+```
