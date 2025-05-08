@@ -1,5 +1,7 @@
 __init__
+demo
 main
 models
 security
+stt_logic
 tts_logic

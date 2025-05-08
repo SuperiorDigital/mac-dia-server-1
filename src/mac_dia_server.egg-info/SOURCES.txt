@@ -1,9 +1,11 @@
 README.md
 pyproject.toml
 src/__init__.py
+src/demo.py
 src/main.py
 src/models.py
 src/security.py
+src/stt_logic.py
 src/tts_logic.py
 src/mac_dia_server.egg-info/PKG-INFO
 src/mac_dia_server.egg-info/SOURCES.txt

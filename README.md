@@ -17,11 +17,11 @@ Dia-1.6B is comparable in performance to leading commercial TTS solutions, while
 ## Setup
 
 1.  **Install Dependencies:**
-    Requires Python 3.9+ and `uv`.
+    Requires Python 3.12+ and `uv`.
     ```bash
     uv venv  # Create virtual environment
     source .venv/bin/activate
-    uv pip install -r requirements.txt # Or 'uv pip install .' if using pyproject.toml directly
+    uv pip install .
     # Special attention might be needed for installing mlx and mlx-audio.
     # Follow official MLX documentation.
     ```
@@ -53,7 +53,7 @@ Dia-1.6B is comparable in performance to leading commercial TTS solutions, while
 
 ## CURl
 ```bash
- 
+
   curl -X 'POST' \
   'http://localhost:8000/v1/audio/speech' \
   -H 'accept: application/json' \
@@ -67,4 +67,13 @@ Dia-1.6B is comparable in performance to leading commercial TTS solutions, while
   "speed": 1
  }' \
     --output speech.mp3
+```
+
+
+```
+curl -X POST http://localhost:8000/v1/audio/transcriptions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F file=@/yourfile \
+  -F model=mlx-community/whisper-large-v3-turbo \
+  -F language=en
 ```
