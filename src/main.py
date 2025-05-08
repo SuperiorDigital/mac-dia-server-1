@@ -49,7 +49,7 @@ async def create_speech(request: models.TTSRequest):
 )
 async def create_transcription(
     file: UploadFile = File(...),
-    model: str = Form("whisper-large-v3"),
+    model: Optional[str] = Form("mlx-community/whisper-large-v3-turbo"),
     language: Optional[str] = Form(None),
     prompt: Optional[str] = Form(None),
     response_format: Optional[str] = Form("json"),
@@ -77,7 +77,7 @@ async def create_transcription(
         result = await asyncio.to_thread(
             stt_logic.transcribe_audio_sync,
             audio_buffer,
-            model_name=model,
+            model_name="mlx-community/whisper-large-v3-turbo",
             language=language,
             prompt=prompt,
             temperature=temperature,
