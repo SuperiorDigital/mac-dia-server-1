@@ -27,3 +27,4 @@ dist/
 *.xcf
 *.log
 .idea/
+server.pid
