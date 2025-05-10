@@ -1,7 +1,6 @@
 README.md
 pyproject.toml
 src/__init__.py
-src/demo.py
 src/main.py
 src/models.py
 src/security.py

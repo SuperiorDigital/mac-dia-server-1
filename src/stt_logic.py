@@ -5,7 +5,7 @@ import tempfile
 import asyncio
 from typing import Optional, BinaryIO, Dict, Any, Union
 
-from mlx_audio.stt.models.whisper import Whisper
+from mlx_audio.stt.models.whisper import Model
 
 def transcribe_audio_sync(
     audio_file: Union[str, BinaryIO, bytes],
@@ -30,7 +30,7 @@ def transcribe_audio_sync(
     print(f"Transcribing audio using model: {model_name}")
 
     # Load the Whisper model
-    model = Whisper.from_pretrained(model_name)
+    model = Model.from_pretrained(model_name)
 
     temp_file = None
     try:

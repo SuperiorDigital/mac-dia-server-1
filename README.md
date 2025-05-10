@@ -24,6 +24,7 @@ Dia-1.6B is comparable in performance to leading commercial TTS solutions, while
     uv pip install .
     # Special attention might be needed for installing mlx and mlx-audio.
     # Follow official MLX documentation.
+    uv run start.py
     ```
 
 2.  **Configure API Key:**
