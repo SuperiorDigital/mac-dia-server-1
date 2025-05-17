@@ -2,58 +2,54 @@
 
 import io
 import time
+import gc  # 新增：用于手动回收内存
 from .models import TTSRequest # Use relative import
 from mlx_audio.tts.generate import generate_audio
 
 def generate_speech_from_text_sync(request: TTSRequest) -> tuple[io.BytesIO, str]:
-    """Generate speech using mlx-audio and return audio data.
-
+    """
+    每次请求时加载模型，合成后立即释放内存。
     Args:
         request: TTS request details.
-
     Returns:
         A tuple containing an in-memory audio buffer (BytesIO) and the content type string.
     """
     print(f"Generating speech for text: '{request.input[:30]}...' using voice '{request.voice}'")
 
-    # Create temporary filename
     import tempfile
     import os
 
     temp_dir = tempfile.gettempdir()
     temp_file_prefix = os.path.join(temp_dir, "tts_temp")
 
-    # Determine output format
     output_format = request.response_format if hasattr(request, 'response_format') else "mp3"
 
-    # Call mlx-audio to generate audio file
+    # ----------------------
+    # 每次请求时加载模型并生成音频
+    # ----------------------
+    # 注意：mlx_audio.tts.generate.generate_audio 内部会自动加载模型
     generate_audio(
         text=request.input,
-        model_path="mlx-community/Dia-1.6B-4bit",  # Use specified model
+        model_path="mlx-community/Dia-1.6B-fp16",  # Use specified model
         file_prefix=temp_file_prefix,
         audio_format=output_format,
-        verbose=True  # Reduce output
+        verbose=True
     )
+    # ----------------------
+    # 生成完毕后，尝试释放内存
+    # ----------------------
+    gc.collect()  # 强制回收内存，防止模型常驻
 
-    # Determine generated filename
-    # Note: generate_audio will create files in the format temp_file_prefix_000.{format}
     temp_file_name = f"{temp_file_prefix}_000.{output_format}"
-
-    # Check if file exists
     if not os.path.exists(temp_file_name):
-        # Try filename without index
         temp_file_name = f"{temp_file_prefix}.{output_format}"
         if not os.path.exists(temp_file_name):
             raise FileNotFoundError(f"Generated audio file not found: {temp_file_name}")
 
-    # Read the generated audio file
     with open(temp_file_name, "rb") as f:
         audio_content = f.read()
-
-    # Create memory buffer
     audio_buffer = io.BytesIO(audio_content)
 
-    # Determine content type
     content_type_map = {
         "mp3": "audio/mpeg",
         "opus": "audio/opus",
@@ -61,9 +57,8 @@ def generate_speech_from_text_sync(request: TTSRequest) -> tuple[io.BytesIO, str
         "flac": "audio/flac",
         "wav": "audio/wav",
     }
-    content_type = content_type_map.get(output_format, "audio/mpeg")  # Default to mp3
+    content_type = content_type_map.get(output_format, "audio/mpeg")
 
-    # Delete temporary file
     try:
         os.remove(temp_file_name)
     except Exception as e:
