@@ -24,9 +24,12 @@ app = FastAPI(
 async def create_speech(request: models.TTSRequest):
     """Handles the text-to-speech request, compatible with OpenAI's API."""
     try:
-        # Run the potentially blocking TTS generation in a separate thread
-        audio_buffer, content_type = await asyncio.to_thread(
-            tts_logic.generate_speech_from_text_sync, request
+        # Run the potentially blocking TTS generation in a separate thread with 60s timeout
+        audio_buffer, content_type = await asyncio.wait_for(
+            asyncio.to_thread(
+                tts_logic.generate_speech_from_text_sync, request
+            ),
+            timeout=60.0
         )
 
         # Reset buffer position to the beginning before streaming
@@ -34,6 +37,12 @@ async def create_speech(request: models.TTSRequest):
 
         return StreamingResponse(audio_buffer, media_type=content_type)
 
+    except asyncio.TimeoutError:
+        print("TTS generation timed out after 60 seconds")
+        raise HTTPException(
+            status_code=408,
+            detail="Request timed out after 60 seconds"
+        )
     except Exception as e:
         # Basic error handling, might need refinement
         print(f"Error during TTS generation: {e}")
@@ -73,14 +82,17 @@ async def create_transcription(
                 detail=f"Unsupported file format. Supported formats are: {', '.join(valid_formats)}"
             )
 
-        # Run the potentially blocking STT processing in a separate thread
-        result = await asyncio.to_thread(
-            stt_logic.transcribe_audio_sync,
-            audio_buffer,
-            model_name="mlx-community/whisper-large-v3-turbo",
-            language=language,
-            prompt=prompt,
-            temperature=temperature,
+        # Run the potentially blocking STT processing in a separate thread with 60s timeout
+        result = await asyncio.wait_for(
+            asyncio.to_thread(
+                stt_logic.transcribe_audio_sync,
+                audio_buffer,
+                model_name="mlx-community/whisper-large-v3-turbo",
+                language=language,
+                prompt=prompt,
+                temperature=temperature,
+            ),
+            timeout=60.0
         )
 
         # Format the response according to the requested format
@@ -92,6 +104,12 @@ async def create_transcription(
             # For now, just return the text
             return {"text": result["text"]}
 
+    except asyncio.TimeoutError:
+        print("STT processing timed out after 60 seconds")
+        raise HTTPException(
+            status_code=408,
+            detail="Request timed out after 60 seconds"
+        )
     except Exception as e:
         print(f"Error during STT processing: {e}")
         raise HTTPException(

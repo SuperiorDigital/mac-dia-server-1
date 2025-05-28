@@ -11,4 +11,3 @@ src/mac_dia_server.egg-info/SOURCES.txt
 src/mac_dia_server.egg-info/dependency_links.txt
 src/mac_dia_server.egg-info/requires.txt
 src/mac_dia_server.egg-info/top_level.txt
-tests/test-dia.py
