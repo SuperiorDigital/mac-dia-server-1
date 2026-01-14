@@ -35,3 +35,22 @@ class STTRequest(BaseModel):
     temperature: Optional[float] = Field(
         default=0.0, description="The sampling temperature, between 0 and 1."
     )
+
+
+# Model for internal use with voice cloning (not directly a request body since we use multipart form)
+class VoiceCloneParams(BaseModel):
+    """Parameters for voice cloning TTS generation."""
+    input: str = Field(..., description="The text to synthesize.")
+    ref_audio_path: str = Field(..., description="Path to the reference audio file for voice cloning.")
+    ref_text: Optional[str] = Field(
+        default=None, description="Transcript of the reference audio. If not provided, will be auto-transcribed."
+    )
+    response_format: Optional[Literal["mp3", "opus", "aac", "flac", "wav"]] = Field(
+        default="mp3", description="The format of the audio output."
+    )
+    speed: Optional[float] = Field(
+        default=1.0,
+        ge=0.25,
+        le=4.0,
+        description="The speed of the speech, from 0.25 to 4.0."
+    )

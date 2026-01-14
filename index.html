@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dia Voice Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-input: #22222e;
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --accent-hover: #a78bfa;
+            --text-primary: #f1f1f3;
+            --text-secondary: #9898a6;
+            --text-muted: #5c5c6e;
+            --border: #2a2a3a;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background-image: 
+                radial-gradient(ellipse at top, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), #3b82f6);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+
+        .logo-text {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.75rem;
+            background: var(--bg-secondary);
+            padding: 0.375rem;
+            border-radius: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .required::after {
+            content: '*';
+            color: var(--accent);
+            margin-left: 0.25rem;
+        }
+
+        textarea, input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            resize: none;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        textarea::placeholder, input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .file-drop {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--bg-input);
+        }
+
+        .file-drop:hover, .file-drop.dragover {
+            border-color: var(--accent);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .file-drop.has-file {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .file-drop-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .file-drop-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .file-drop-text strong {
+            color: var(--accent);
+        }
+
+        .file-name {
+            margin-top: 0.75rem;
+            font-size: 0.8125rem;
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .options-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .options-row .form-group {
+            flex: 1;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239898a6' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-loading .btn-text {
+            display: none;
+        }
+
+        .btn-loading .spinner {
+            display: block;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .status.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        .status.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .audio-player {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .audio-player.visible {
+            display: block;
+        }
+
+        .audio-player audio {
+            width: 100%;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+        }
+
+        .audio-player audio::-webkit-media-controls-panel {
+            background: var(--bg-secondary);
+        }
+
+        .download-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .download-btn:hover {
+            background: var(--bg-input);
+            border-color: var(--accent);
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.375rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">🎙️</div>
+                <span class="logo-text">Dia Voice Studio</span>
+            </div>
+            <p class="tagline">AI-powered text-to-speech with voice cloning</p>
+        </div>
+
+        <div class="card">
+            <div class="tabs">
+                <button class="tab active" data-tab="clone">🎭 Voice Clone</button>
+                <button class="tab" data-tab="standard">🔊 Standard TTS</button>
+            </div>
+
+            <!-- Voice Clone Tab -->
+            <div class="tab-content active" id="clone-tab">
+                <div class="form-group">
+                    <label class="required">Text to Synthesize</label>
+                    <textarea id="clone-text" placeholder="Enter the text you want spoken in the cloned voice..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="required">Reference Audio</label>
+                    <div class="file-drop" id="file-drop">
+                        <div class="file-drop-icon">📁</div>
+                        <p class="file-drop-text">Drop your audio file here or <strong>browse</strong></p>
+                        <div class="file-name" id="file-name"></div>
+                    </div>
+                    <input type="file" class="file-input" id="ref-audio" accept="audio/*">
+                    <p class="hint">~10 seconds of clear speech recommended</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Reference Transcript <span style="color: var(--text-muted)">(optional)</span></label>
+                    <input type="text" id="ref-text" placeholder="What is said in the reference audio...">
+                    <p class="hint">Providing this improves voice matching quality</p>
+                </div>
+
+                <div class="options-row">
+                    <div class="form-group">
+                        <label>Format</label>
+                        <select id="clone-format">
+                            <option value="mp3">MP3</option>
+                            <option value="wav">WAV</option>
+                            <option value="flac">FLAC</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Speed</label>
+                        <select id="clone-speed">
+                            <option value="0.75">0.75x</option>
+                            <option value="1.0" selected>1.0x</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn" id="clone-btn" onclick="generateClonedSpeech()">
+                    <span class="btn-text">✨ Generate Cloned Voice</span>
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <!-- Standard TTS Tab -->
+            <div class="tab-content" id="standard-tab">
+                <div class="form-group">
+                    <label class="required">Text to Synthesize</label>
+                    <textarea id="standard-text" placeholder="Enter text... Use [S1] and [S2] tags for dialogue!"></textarea>
+                    <p class="hint">Example: [S1] Hello there! [S2] How are you today?</p>
+                </div>
+
+                <div class="options-row">
+                    <div class="form-group">
+                        <label>Format</label>
+                        <select id="standard-format">
+                            <option value="mp3">MP3</option>
+                            <option value="wav">WAV</option>
+                            <option value="flac">FLAC</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Voice</label>
+                        <select id="standard-voice">
+                            <option value="alloy">Alloy</option>
+                            <option value="echo">Echo</option>
+                            <option value="fable">Fable</option>
+                            <option value="onyx">Onyx</option>
+                            <option value="nova">Nova</option>
+                            <option value="shimmer">Shimmer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn" id="standard-btn" onclick="generateStandardSpeech()">
+                    <span class="btn-text">🔊 Generate Speech</span>
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <!-- API Key (shared) -->
+            <div class="form-group" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                <label>API Key</label>
+                <input type="password" id="api-key" placeholder="Enter your API key">
+            </div>
+
+            <div class="status" id="status"></div>
+
+            <div class="audio-player" id="audio-player">
+                <audio controls id="audio-element"></audio>
+                <a class="download-btn" id="download-btn" download="generated_audio.mp3">
+                    ⬇️ Download Audio
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                hideStatus();
+                hidePlayer();
+            });
+        });
+
+        // File drop handling
+        const fileDrop = document.getElementById('file-drop');
+        const fileInput = document.getElementById('ref-audio');
+        const fileName = document.getElementById('file-name');
+
+        fileDrop.addEventListener('click', () => fileInput.click());
+
+        fileDrop.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileDrop.classList.add('dragover');
+        });
+
+        fileDrop.addEventListener('dragleave', () => {
+            fileDrop.classList.remove('dragover');
+        });
+
+        fileDrop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileDrop.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                updateFileName();
+            }
+        });
+
+        fileInput.addEventListener('change', updateFileName);
+
+        function updateFileName() {
+            if (fileInput.files.length) {
+                fileName.textContent = `✓ ${fileInput.files[0].name}`;
+                fileDrop.classList.add('has-file');
+            } else {
+                fileName.textContent = '';
+                fileDrop.classList.remove('has-file');
+            }
+        }
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${isError ? 'error' : 'success'}`;
+        }
+
+        function hideStatus() {
+            document.getElementById('status').className = 'status';
+        }
+
+        function hidePlayer() {
+            document.getElementById('audio-player').classList.remove('visible');
+        }
+
+        function showPlayer(blob, format) {
+            const audioElement = document.getElementById('audio-element');
+            const downloadBtn = document.getElementById('download-btn');
+            const url = URL.createObjectURL(blob);
+            
+            audioElement.src = url;
+            downloadBtn.href = url;
+            downloadBtn.download = `generated_audio.${format}`;
+            
+            document.getElementById('audio-player').classList.add('visible');
+        }
+
+        function setLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            btn.disabled = loading;
+            btn.classList.toggle('btn-loading', loading);
+        }
+
+        async function generateClonedSpeech() {
+            const text = document.getElementById('clone-text').value.trim();
+            const refAudio = document.getElementById('ref-audio').files[0];
+            const refText = document.getElementById('ref-text').value.trim();
+            const format = document.getElementById('clone-format').value;
+            const speed = document.getElementById('clone-speed').value;
+            const apiKey = document.getElementById('api-key').value.trim();
+
+            if (!text) return showStatus('Please enter text to synthesize', true);
+            if (!refAudio) return showStatus('Please upload a reference audio file', true);
+
+            hideStatus();
+            hidePlayer();
+            setLoading('clone-btn', true);
+
+            const formData = new FormData();
+            formData.append('input', text);
+            formData.append('ref_audio', refAudio);
+            if (refText) formData.append('ref_text', refText);
+            formData.append('response_format', format);
+            formData.append('speed', speed);
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/audio/speech/clone`, {
+                    method: 'POST',
+                    headers: apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {},
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Generation failed');
+                }
+
+                const blob = await response.blob();
+                showPlayer(blob, format);
+                showStatus('Voice cloning complete! 🎉');
+            } catch (error) {
+                showStatus(error.message, true);
+            } finally {
+                setLoading('clone-btn', false);
+            }
+        }
+
+        async function generateStandardSpeech() {
+            const text = document.getElementById('standard-text').value.trim();
+            const format = document.getElementById('standard-format').value;
+            const voice = document.getElementById('standard-voice').value;
+            const apiKey = document.getElementById('api-key').value.trim();
+
+            if (!text) return showStatus('Please enter text to synthesize', true);
+
+            hideStatus();
+            hidePlayer();
+            setLoading('standard-btn', true);
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/audio/speech`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
+                    },
+                    body: JSON.stringify({
+                        model: 'tts-1',
+                        input: text,
+                        voice: voice,
+                        response_format: format
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Generation failed');
+                }
+
+                const blob = await response.blob();
+                showPlayer(blob, format);
+                showStatus('Audio generated successfully! 🔊');
+            } catch (error) {
+                showStatus(error.message, true);
+            } finally {
+                setLoading('standard-btn', false);
+            }
+        }
+    </script>
+</body>
+</html>

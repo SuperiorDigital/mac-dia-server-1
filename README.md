@@ -78,3 +78,35 @@ curl -X POST http://localhost:8000/v1/audio/transcriptions \
   -F model=mlx-community/whisper-large-v3-turbo \
   -F language=en
 ```
+
+## Voice Cloning
+
+The server supports voice cloning from a reference audio file. Upload a ~10 second audio sample of the voice you want to clone.
+
+**Endpoint:** `/v1/audio/speech/clone`
+
+**Parameters:**
+- `input` (required): The text to synthesize
+- `ref_audio` (required): Reference audio file for voice cloning (~10 seconds recommended)
+- `ref_text` (optional): Transcript of the reference audio (auto-transcribed if not provided)
+- `response_format` (optional): Output format - mp3, wav, opus, aac, flac (default: mp3)
+- `speed` (optional): Speech speed 0.25-4.0 (default: 1.0)
+
+### Voice Cloning cURL Example
+
+```bash
+curl -X POST http://localhost:8000/v1/audio/speech/clone \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "input=Hello, this is my cloned voice speaking!" \
+  -F "ref_audio=@/path/to/reference_audio.mp3" \
+  -F "ref_text=This is what the reference audio says." \
+  -F "response_format=mp3" \
+  --output cloned_speech.mp3
+```
+
+### Tips for Best Results
+
+1. **Reference audio ~10 seconds** - Longer isn't necessarily better
+2. **Clean audio** - No background noise, just the speaker's voice  
+3. **Provide ref_text** - Accurate transcript improves quality
+4. **Single speaker** - Reference should contain only one voice
