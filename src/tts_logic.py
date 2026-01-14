@@ -28,11 +28,13 @@ def generate_speech_from_text_sync(request: TTSRequest) -> tuple[io.BytesIO, str
     # 每次请求时加载模型并生成音频
     # ----------------------
     # 注意：mlx_audio.tts.generate.generate_audio 内部会自动加载模型
+
     generate_audio(
         text=request.input,
-        model_path="mlx-community/Dia-1.6B-fp16",  # Use specified model
+        model="mlx-community/Dia-1.6B-fp16",
         file_prefix=temp_file_prefix,
         audio_format=output_format,
+        voice="af_heart",
         verbose=True
     )
     # ----------------------
