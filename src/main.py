@@ -146,6 +146,101 @@ async def create_cloned_speech(
         except Exception as e:
             print(f"Warning: Could not delete temp reference file {temp_ref_path}: {e}")
 
+
+@app.post(
+    "/v1/audio/speech/clone/long",
+    response_description="Audio stream with cloned voice for long-form text",
+    tags=["TTS"],
+)
+async def create_cloned_speech_long(
+    input: str = Form(..., description="The full text to synthesize (2000-20000+ words supported)"),
+    ref_audio: UploadFile = File(..., description="Reference audio file for voice cloning (~10 seconds recommended)"),
+    ref_text: Optional[str] = Form(None, description="Transcript of the reference audio (optional)"),
+    response_format: Optional[str] = Form("mp3", description="Output audio format: mp3, wav, opus, aac, flac"),
+    speed: Optional[float] = Form(1.0, description="Speech speed (0.25 to 4.0)"),
+    max_words_per_chunk: Optional[int] = Form(300, description="Maximum words per chunk (200-500 recommended)"),
+):
+    """
+    Generates long-form speech using voice cloning.
+    
+    Handles 2000-20000+ words by:
+    1. Splitting text into chunks at sentence boundaries
+    2. Generating audio for each chunk with the same voice
+    3. Concatenating all chunks into a single audio file
+    
+    Note: This endpoint has a longer timeout (30 minutes) for large texts.
+    """
+    import tempfile
+    import os
+    
+    # Validate speed
+    if speed < 0.25 or speed > 4.0:
+        raise HTTPException(status_code=400, detail="Speed must be between 0.25 and 4.0")
+    
+    # Validate chunk size
+    if max_words_per_chunk < 50 or max_words_per_chunk > 1000:
+        raise HTTPException(status_code=400, detail="max_words_per_chunk must be between 50 and 1000")
+    
+    # Validate response format
+    valid_formats = ["mp3", "opus", "aac", "flac", "wav"]
+    if response_format not in valid_formats:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid response_format. Supported formats: {', '.join(valid_formats)}"
+        )
+    
+    # Save uploaded reference audio to temp file
+    ref_audio_content = await ref_audio.read()
+    ref_ext = ref_audio.filename.split(".")[-1].lower() if ref_audio.filename and "." in ref_audio.filename else "mp3"
+    
+    temp_ref_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{ref_ext}")
+    temp_ref_path = temp_ref_file.name
+    
+    try:
+        temp_ref_file.write(ref_audio_content)
+        temp_ref_file.close()
+        
+        word_count = len(input.split())
+        print(f"Long-form clone request: {word_count} words, ref_audio: {temp_ref_path}")
+        
+        # Calculate timeout based on word count (roughly 2 seconds per word + buffer)
+        timeout_seconds = max(300, word_count * 2)  # Minimum 5 minutes
+        timeout_seconds = min(timeout_seconds, 1800)  # Maximum 30 minutes
+        
+        audio_buffer, content_type = await asyncio.wait_for(
+            asyncio.to_thread(
+                tts_logic.generate_cloned_speech_long_sync,
+                text=input,
+                ref_audio_path=temp_ref_path,
+                ref_text=ref_text,
+                output_format=response_format,
+                speed=speed,
+                max_words_per_chunk=max_words_per_chunk
+            ),
+            timeout=timeout_seconds
+        )
+        
+        audio_buffer.seek(0)
+        return StreamingResponse(audio_buffer, media_type=content_type)
+    
+    except asyncio.TimeoutError:
+        print(f"Long-form voice cloning timed out after {timeout_seconds} seconds")
+        raise HTTPException(
+            status_code=408,
+            detail=f"Request timed out after {timeout_seconds} seconds"
+        )
+    except Exception as e:
+        print(f"Error during long-form voice cloning: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate cloned audio: {str(e)}"
+        )
+    finally:
+        try:
+            os.remove(temp_ref_path)
+        except Exception as e:
+            print(f"Warning: Could not delete temp reference file {temp_ref_path}: {e}")
+
 @app.post(
     "/v1/audio/transcriptions",
     dependencies=[Depends(security.get_api_key)],  # Apply API Key authentication
